@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api\CatgoryNotes;
+namespace App\Http\Resources\Api\CategoryNotes;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,10 +19,8 @@ class CategoryNotesResource extends JsonResource
             'name' => $this->name,
             'img' => $this->img,         
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'embedded' => [
-                'color' => $this->color  
-            ],
+            'updated_at' => $this->updated_at,            
+            'color' => $this->color,
             'links' => [
                 'self' => [
                     'href' => route('api.categories.show',$this->id)

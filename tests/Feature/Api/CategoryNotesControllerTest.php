@@ -84,20 +84,10 @@ class CategoryNotesControllerTest extends TestCase
      * @return void
      */
     public function test_showing_a_nonexistent_category()
-    {        
-
+    {   
         $this->withHeaders($this->headersArray)
         ->get('/api/categories/0')
-        ->assertStatus(404)
-        ->assertExactJson([
-            'meta'=> [
-                "status" => "error",
-                "message" => "Resource not found!",
-                "code" => 404              
-            ],
-        ]);
- 
-
+        ->assertStatus(404);
     }    
 
 
@@ -138,23 +128,12 @@ class CategoryNotesControllerTest extends TestCase
      */
     public function test_invalid_data_when_create_a_category()
     {        
-
         $this->withHeaders($this->headersArray)
         ->json('POST', '/api/categories', [
             'name' => 'Немедленно',   
             'color_id' => null,   
         ])
-        ->assertStatus(422)
-        ->assertJsonStructure(
-            [ 
-                'message',          
-                'errors' => [
-                    'name',
-                    'color_id'
-                ]
-            ]
-        );
-
+        ->assertStatus(422);
     }
 
 
@@ -198,25 +177,14 @@ class CategoryNotesControllerTest extends TestCase
      * @return void
      */
     public function test_invalid_data_when_update_a_category()
-    {        
-
+    {     
         $category = CategoryNotes::orderBy('id', 'desc')->first();
         $this->withHeaders($this->headersArray)
         ->json('PUT', '/api/categories/'.$category->id, [
             'name' => 'Немедленно',   
             'color_id' => null,   
         ])
-        ->assertStatus(422)
-        ->assertJsonStructure(
-            [ 
-                'message',          
-                'errors' => [
-                    'name',
-                    'color_id'
-                ]
-            ]
-        );
-
+        ->assertStatus(422);
     }
 
     /**
@@ -225,14 +193,12 @@ class CategoryNotesControllerTest extends TestCase
      * @return void
      */
     public function test_updating_a_nonexistent_category()
-    {        
-   
+    {       
         $this->withHeaders($this->headersArray)
         ->json('PUT', '/api/categories/0', [
             'name' => 'New name' 
         ])
         ->assertStatus(404);
-
     }    
 
     /**
@@ -242,13 +208,10 @@ class CategoryNotesControllerTest extends TestCase
      */
     public function test_deleting_a_category()
     {
-
         $category = CategoryNotes::orderBy('id', 'desc')->first();
         $this->withHeaders($this->headersArray)
         ->json('DELETE', '/api/categories/'.$category->id)
         ->assertStatus(204);
-
-
     }
 
     /**

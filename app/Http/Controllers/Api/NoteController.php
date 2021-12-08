@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Library\ApiResponseHelpers;
 use App\Http\Requests\Api\StoreNoteRequest;
 use App\Http\Requests\Api\UpdateNoteRequest;
-use App\Http\Resources\Api\NoteCollection;
-use App\Http\Resources\Api\NoteResource;
+use App\Http\Resources\Api\Note\NoteCollection;
+use App\Http\Resources\Api\Note\NoteResource;
 use App\Models\Note;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +19,7 @@ class NoteController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \App\Http\Resources\Api\NoteCollection;
+     * @return \App\Http\Resources\Api\Note\NoteCollection;
      */
     public function index()
     {
@@ -97,6 +97,9 @@ class NoteController extends Controller
         try {
             $result = $note->delete();
             return response()->json(null, 204);
+            if (!$result) {
+                abort(500, 'Something went wrong.'); 
+            }
         } catch (\Exception $e) {
             Log::error('Server error 500 | '.$e->getMessage());
             abort(500, 'Something went wrong.');   

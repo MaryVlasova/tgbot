@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api\CatgoryNotes;
+namespace App\Http\Resources\Api\CategoryNotes;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 

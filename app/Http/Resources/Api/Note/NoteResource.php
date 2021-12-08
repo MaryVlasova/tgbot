@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Api\Note;
 
+use App\Http\Resources\Api\CategoryNotes\CategoryNotesResource;
+use App\Http\Resources\Api\User\UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NoteResource extends JsonResource
@@ -20,11 +22,9 @@ class NoteResource extends JsonResource
             'text' => $this->text,
             'img' => $this->img, 
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'embedded' => [
-                'category' => new CategoryNotesResource($this->categoryNotes),
-                'author' => new UserResource($this->author)
-            ], 
+            'updated_at' => $this->updated_at,            
+            'category' => new CategoryNotesResource($this->categoryNotes),
+            'author' => new UserResource($this->author),           
             'links' => [
                 'self' => [
                     'href' => route('api.notes.show',$this->id)

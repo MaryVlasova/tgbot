@@ -59,10 +59,10 @@ class NoteControllerTest extends TestCase
         $this->withHeaders($this->headersArray)
         ->get('/api/notes/'.$note->id)
         ->assertStatus(200)
-         ->assertJsonStructure(
+         ->assertJsonFragment(
             [ 
-                'note',          
-                'meta'
+                'id' => $note->id,
+                "name" => $note->name
             ]
 
         );
@@ -74,20 +74,10 @@ class NoteControllerTest extends TestCase
      * @return void
      */
     public function test_showing_a_nonexistent_note()
-    {
-        
+    {        
         $this->withHeaders($this->headersArray)
         ->get('/api/notes/0')
-        ->assertStatus(404)
-        ->assertExactJson([
-            'meta'=> [
-                "status" => "error",
-                "message" => "Resource not found!",
-                "code" => 404              
-            ],
-        ]);
-
-
+        ->assertStatus(404);
     }  
     /**
      * A basic feature test example.
@@ -124,26 +114,14 @@ class NoteControllerTest extends TestCase
      * @return void
      */
     public function test_invalid_data_when_create_a_category()
-    {        
-
+    {      
         $this->withHeaders($this->headersArray)
         ->json('POST', '/api/notes', [
             'title' => null,
             'text' => null,
             'category_notes_id' => null,
         ])
-        ->assertStatus(422)
-        ->assertJsonStructure(
-            [ 
-                'message',          
-                'errors' => [
-                    'title',
-                    'text',
-                    'category_notes_id'
-                ]
-            ]
-        );
-
+        ->assertStatus(422);
     }
 
 
@@ -187,8 +165,7 @@ class NoteControllerTest extends TestCase
      * @return void
      */
     public function test_invalid_data_when_update_a_category()
-    {        
-
+    {      
         $note = Note::orderBy('id', 'desc')->first();
         $category = CategoryNotes::orderBy('id', 'desc')->first();  
         $this->withHeaders($this->headersArray)
@@ -197,18 +174,7 @@ class NoteControllerTest extends TestCase
             'text' => null,
             'category_notes_id' => null,
         ])
-        ->assertStatus(422)
-        ->assertJsonStructure(
-            [ 
-                'message',          
-                'errors' => [
-                    'title',
-                    'text',
-                    'category_notes_id'
-                ]
-            ]
-        );
-
+        ->assertStatus(422);
     }
 
     /**
@@ -218,7 +184,6 @@ class NoteControllerTest extends TestCase
      */
     public function test_updating_a_nonexistent_category()
     {        
-   
         $category = CategoryNotes::orderBy('id', 'desc')->first();  
         $this->withHeaders($this->headersArray)
         ->json('PUT', '/api/notes/0', [
@@ -227,7 +192,6 @@ class NoteControllerTest extends TestCase
             'category_notes_id' => $category->id, 
         ])
         ->assertStatus(404);
-
     }   
 
 
@@ -238,13 +202,10 @@ class NoteControllerTest extends TestCase
      */
     public function test_deleting_a_category()
     {
-
         $note = Note::orderBy('id', 'desc')->first();
         $this->withHeaders($this->headersArray)
         ->json('DELETE', '/api/notes/'.$note->id)
         ->assertStatus(204);
-
-
     }
 
     /**
@@ -254,11 +215,9 @@ class NoteControllerTest extends TestCase
      */
     public function test_deleting_a_nonexistent_category()
     {        
-
         $this->withHeaders($this->headersArray)
         ->json('DELETE', '/api/notes/0')
         ->assertStatus(404);
-
     }
 
 

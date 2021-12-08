@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Library\ApiResponseHelpers;
 use App\Http\Requests\Api\StoreCategoryNotesRequest;
 use App\Http\Requests\Api\UpdateCategoryNotesRequest;
-use App\Http\Resources\Api\CatgoryNotes\CategoryNotesCollection;
-use App\Http\Resources\Api\CatgoryNotes\CategoryNotesResource;
+use App\Http\Resources\Api\CategoryNotes\CategoryNotesCollection;
+use App\Http\Resources\Api\CategoryNotes\CategoryNotesResource;
 use App\Models\CategoryNotes;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +21,7 @@ class CategoryNotesController extends Controller
      */
     public function index()
     {  
-        $categoriesOfNotes = CategoryNotes::all()->paginate(10);            
+        $categoriesOfNotes = CategoryNotes::paginate(10);            
         return new CategoryNotesCollection($categoriesOfNotes);
     }
 

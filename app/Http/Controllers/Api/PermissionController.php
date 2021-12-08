@@ -1,9 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\Permission\PermissionCollection;
+use App\Http\Resources\Api\Permission\PermissionResource;
 use App\Models\Permission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PermissionController extends Controller
 {
@@ -14,7 +18,8 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        //
+        $permission = Permission::all();            
+        return new PermissionCollection($permission);
     }
 
     /**
@@ -46,7 +51,7 @@ class PermissionController extends Controller
      */
     public function show(Permission $permission)
     {
-        //
+        return new PermissionResource($permission);
     }
 
     /**
@@ -80,6 +85,15 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
-        //
+        try {
+            $result = $permission->delete();
+            return response()->json(null, 204);
+            if (!$result) {
+                abort(500, 'Something went wrong.'); 
+            }
+        } catch (\Exception $e) {
+            Log::error('Server error 500 | '.$e->getMessage());
+            abort(500, 'Something went wrong.');   
+        }
     }
 }
