@@ -7,6 +7,7 @@ use App\Http\Library\ApiResponseHelpers;
 use App\Http\Requests\Api\StoreNoteRequest;
 use App\Http\Requests\Api\UpdateNoteRequest;
 use App\Http\Resources\Api\NoteCollection;
+use App\Http\Resources\Api\NoteResource;
 use App\Models\Note;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -22,75 +23,19 @@ class NoteController extends Controller
      */
     public function index()
     {
-
-        try {
-            $notes = Note::with([
-                                'author:id,name',                
-                                'categoryNotes:id,name,img,color_id', 
-                                'categoryNotes.color'
-                            ])
-                            ->orderBy('id')                                
-                            ->paginate(10); 
-
-
-            foreach ($notes as $note) {
-                $note['links'] = [
-                    'self' => [
-                        'href' => route('api.notes.show', 
-                        ['id' => $note->id
-                    ])
-                ]];
-                if($note->categoryNotes !== null) {
-                    $note->categoryNotes['links'] = ['self' => [
-                        'href' => route('api.notes.show', ['id' => $note->categoryNotes->id])
-                    ]];     
-                        
-                }
-            }
-            return new NoteCollection($notes);
-
-        } catch (\Exception $e) {
-            Log::error('Server error 404 | '.$e->getMessage().' | index note');
-            return $this->withError(500, 'Server error');
-        }
-
-        
+        $notes = Note::orderBy('id')->paginate(10); 
+        return new NoteCollection($notes);        
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int $id
+     * @param  Note $note
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(Note $note)
     {
- 
-        try {            
-            $note = Note::findOrFail($id);
-            $note->load([
-                'author:id,name',                
-                'categoryNotes:id,name,img,color_id', 
-                'categoryNotes.color'
-            ]);
-     
-        } catch (\Exception $e) {
-            Log::error('Server error 404 | '.$e->getMessage().' | show note');
-            return $this->withError(404, 'Resource not found!');
-        }
-
-        try {
-           
-            $note->links = ['self' => [
-                'href' => route('api.notes.show', ['id' => $note->id])
-            ]]; 
-            return $this->withSuccess(200, 'ok', ['note' => $note]);
-
-        } catch (\Exception $e) {
-
-            Log::error('Server error 500 | '.$e->getMessage().' | show note');
-            return $this->withError(500, 'Server error');
-        }
+        return new NoteResource($note);
     }
 
 
@@ -109,18 +54,11 @@ class NoteController extends Controller
                     ['author_id'=> Auth::id()]
                 ])
             );
-           
-            return $this->withSuccess(201, 'Created', [
-                'note' => $note,
-                'links' => ['self' => [
-                    'href' => route('api.notes.index')
-                ]]    
-            ]);          
+            return response()->json(new NoteResource($note), 204);        
 
-        } catch (\Exception $e) {
-            
-            Log::error('Server error 500 | '.$e->getMessage().' | store note');
-            return $this->withError(500, 'Server error');
+        } catch (\Exception $e) {            
+            Log::error('Server error 500 | '.$e->getMessage());
+            abort(500, 'Something went wrong.');   
         }
    
 
@@ -134,29 +72,15 @@ class NoteController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateNoteRequest $request, int $id)
+    public function update(UpdateNoteRequest $request, Note $note)
     {
-        try {
-            $note = Note::findOrFail($id); 
-
-        } catch (\Exception $e) {
-            Log::error('Resource not found! 404 | '.$e->getMessage().' | update notes');
-            return $this->withError(404, 'Resource not found!');
-        }
-
         try {   
             $note->update($request->only(["title","text","category_notes_id"])) ;
-            return $this->withSuccess(200, 'ok', [
-                'note' => $note,
-                'links' => ['self' => [
-                    'href' => route('api.notes.index')
-                ]]   
-            ]);  
+            return new NoteResource($note); 
 
         } catch (\Exception $e) {
-
-            Log::error('Server error 500 | '.$e->getMessage().' | update notes');
-            return $this->withError(500, 'Server error');
+            Log::error('Server error 500 | '.$e->getMessage());
+            abort(500, 'Something went wrong.');   
         }
  
     }    
@@ -167,23 +91,15 @@ class NoteController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id)
+    public function destroy(Note $note)
     {
+      
         try {
-            $note = Note::findOrFail($id); 
-        } catch (\Exception $e) {
-            Log::error('Resource not found! 404 | '.$e->getMessage().' | destroy notes');
-            return $this->withError(404, 'Resource not found!');
-        }        
-        try {
-
             $result = $note->delete();
-            return $this->withSuccess(204, 'ok', ['note' => $result]);  
-
+            return response()->json(null, 204);
         } catch (\Exception $e) {
-
-            Log::error('Server error 500 | '.$e->getMessage().' | destroy notes');
-            return $this->withError(500, 'Server error');
+            Log::error('Server error 500 | '.$e->getMessage());
+            abort(500, 'Something went wrong.');   
         }
 
     }

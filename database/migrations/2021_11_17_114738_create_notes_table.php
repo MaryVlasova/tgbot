@@ -26,6 +26,7 @@ class CreateNotesTable extends Migration
             $table->foreign('category_notes_id')->references('id')->on('category_notes')->onDelete('set null')->onUpdate('cascade'); 
             $table->foreign('author_id')->references('id')->on('users')->onDelete('set null')->onUpdate('cascade');      
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

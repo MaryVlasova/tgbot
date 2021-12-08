@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api;
+namespace App\Http\Resources\Api\CatgoryNotes;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -26,21 +26,5 @@ class CategoryNotesCollection extends ResourceCollection
         ];
     }
 
-    /**
-     * Get additional data that should be returned with the resource array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function with($request)
-    {
-        return [
-            'meta' => [
-                'status' => 'success',
-                'message' => 'ok',
-                'code' => 200,
-            ],
-        ];
-    }  
 
 }

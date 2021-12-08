@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Library\ApiResponseHelpers;
 use App\Http\Requests\Api\StoreCategoryNotesRequest;
 use App\Http\Requests\Api\UpdateCategoryNotesRequest;
-use App\Http\Resources\Api\CategoryNotesCollection;
+use App\Http\Resources\Api\CatgoryNotes\CategoryNotesCollection;
+use App\Http\Resources\Api\CatgoryNotes\CategoryNotesResource;
 use App\Models\CategoryNotes;
 use Illuminate\Support\Facades\Log;
 
@@ -19,26 +20,9 @@ class CategoryNotesController extends Controller
      * @return \App\Http\Resources\Api\CategoryNotesCollection;
      */
     public function index()
-    {
-        
-        try {
-            $categoriesOfNotes = CategoryNotes::with('color')->paginate(10);
-            foreach ($categoriesOfNotes as $category) { 
-                $category->links = [
-                    'self' => [
-                        'href' => route('api.categories.show', ['id' => $category->id])
-                    ]
-                ];         
-            }
-            
-            return new CategoryNotesCollection($categoriesOfNotes);
-        } catch (\Exception $e) {
-
-            Log::error('Server error 500 | '.$e->getMessage().' | index category_notes');
-            return $this->withError(500, 'Server error');
-
-        }
-
+    {  
+        $categoriesOfNotes = CategoryNotes::all()->paginate(10);            
+        return new CategoryNotesCollection($categoriesOfNotes);
     }
 
     /**
@@ -52,12 +36,7 @@ class CategoryNotesController extends Controller
 
         try {
             $categoryNotes = CategoryNotes::create($request->only(	["name","color_id"]));
-            return $this->withSuccess(201, 'Created', [
-                    'category' => $categoryNotes->load('color'),
-                    'links' => ['self' => [
-                        'href' => route('api.categories.index')
-                    ]]                
-            ]);          
+            return response()->json(new CategoryNotesResource($categoryNotes), 204);        
 
         } catch (\Exception $e) {
       
@@ -71,34 +50,12 @@ class CategoryNotesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  CategoryNotes $categoryNotes
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
-    {
-        
-        try {
-            $categoryNotes = CategoryNotes::findOrFail($id); 
-            $categoryNotes->load('color');
-        } catch (\Exception $e) {
-            Log::error('Resource not found! 404 | '.$e->getMessage().' | show category_notes');
-            return $this->withError(404, 'Resource not found!');
-        }
-
-        try {          
-            $categoryNotes->links = ['self' => [
-                'href' => route('api.categories.show', ['id' => $categoryNotes->id])
-            ]];   
-            return $this->withSuccess(200, 'ok', [
-                'category' => $categoryNotes
-            ]);       
-
-        } catch (\Exception $e) {
-            Log::error('Server error 500 | '.$e->getMessage().' | show category_notes');
-            return $this->withError(500, 'Server error');
-        }
-
-
+    public function show(CategoryNotes $categoryNotes)
+    {    
+        return new CategoryNotesResource($categoryNotes);
     }
 
 
@@ -109,31 +66,16 @@ class CategoryNotesController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCategoryNotesRequest $request, int $id)
-    {
-        
-        try {
-            $categoryNotes = CategoryNotes::findOrFail($id);           
-        } catch (\Exception $e) {
-            Log::error('Resource not found! 404 | '.$e->getMessage().' | update category_notes');
-            return $this->withError(404, 'Resource not found!');
-        }
+    public function update(UpdateCategoryNotesRequest $request, CategoryNotes $categoryNotes)
+    {        
 
         try {
-
             $categoryNotes->update($request->only(["name","color_id"])) ;
-            return $this->withSuccess(200, 'ok', [
-                    'category' => $categoryNotes,
-                    'links' => ['self' => [
-                        'href' => route('api.notes.index')
-                    ]]
-                ]
-            );  
-
+            return new CategoryNotesResource($categoryNotes);
         } catch (\Exception $e) {
 
             Log::error('Server error 500 | '.$e->getMessage().' | update category_notes');
-            return $this->withError(500, 'Server error');
+            abort(500, 'Something went wrong.');
         }
  
     }
@@ -144,27 +86,14 @@ class CategoryNotesController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id)
+    public function destroy(CategoryNotes $categoryNotes)
     {
-
-        
         try {
-            $categoryNotes = CategoryNotes::findOrFail($id); 
-        } catch (\Exception $e) {
-            Log::error('Resource not found! 404 | '.$e->getMessage().' | destroy category_notes');
-            return $this->withError(404, 'Resource not found!');
-        }  
-
-        try {
-
-            $categoryNotes->delete();             
-            return $this->withSuccess(204, 'ok');  
-
-        } catch (\Exception $e) {
-
+            $categoryNotes->delete();  
+            return response()->json(null, 204);
+        } catch (\Exception $e) {            
             Log::error('Server error 500 | '.$e->getMessage().' | destroy category_notes');
-            return $this->withError(500, 'Server error');
+            abort(500, 'Something went wrong.');
         }
-
     }
 }
