@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Filters\NoteFilter;
 use App\Http\Library\ApiResponseHelpers;
 use App\Http\Requests\Api\StoreNoteRequest;
 use App\Http\Requests\Api\UpdateNoteRequest;
 use App\Http\Resources\Api\Note\NoteCollection;
 use App\Http\Resources\Api\Note\NoteResource;
 use App\Models\Note;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,9 +23,19 @@ class NoteController extends Controller
      *
      * @return \App\Http\Resources\Api\Note\NoteCollection;
      */
-    public function index()
+    public function index(NoteFilter $noteFilter, Request $request)
     {
-        $notes = Note::orderBy('id')->paginate(10); 
+        //date_start=2021-11-10 get from date
+        //date_end=2021-12-10 get to date + 1 day
+        //categories[]=1 get from categories
+        //categories[]=2
+        //query=qwerty serch in title, text, name category and author name
+        //type=order[created_at]=asc
+        //type=order[title]=asc
+        //per_page=10
+        $perPage = $request->input('per_page');
+        $notes = Note::filter($noteFilter)
+                        ->paginate($perPage ? (int)$perPage : 10); 
         return new NoteCollection($notes);        
     }
 

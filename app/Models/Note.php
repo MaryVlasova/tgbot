@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Filters\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Note extends Model
 {
-    use HasFactory, SoftDeletes;    
+    use HasFactory, SoftDeletes, Filterable;    
 
     /**     
      *
@@ -45,5 +46,7 @@ class Note extends Model
     public function categoryNotes()
     {
         return $this->belongsTo(CategoryNotes::class, 'category_notes_id', 'id');
-    }      
+    } 
+    
+      
 }
